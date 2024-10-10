@@ -41,8 +41,12 @@ const handlePromptStream = async (req, res) => {
     try {
         if (!calls[uuid]) {
             // Start a new chat session
+            console.log('Starting new chat session', uuid);
             const start = await axios.post(`https://typebot.io/api/v1/typebots/${process.env.TYPEBOT_PUBLIC_ID}/startChat`, {
                 // isStreamEnabled: true,
+                prefilledVariables: {
+                    uuid
+                },
                 textBubbleContentFormat: 'markdown'
             });
             calls[uuid] = start.data.sessionId;
@@ -73,7 +77,8 @@ const handlePromptStream = async (req, res) => {
 
         res.end();
     } catch (error) {
-        console.error('Error sending message:', error);
+        console.error('Error calling Typebot API:', error.message);
+        res.status(500).json({ message: 'Error communicating with Typebot' });
     }
 }
 
@@ -81,5 +86,5 @@ app.post('/prompt-stream', handlePromptStream);
 
 const port = process.env.PORT || 6005;
 app.listen(port, () => {
-    console.log(`Botpress listening on port ${port}`);
+    console.log(`Typebot listening on port ${port}`);
 });
