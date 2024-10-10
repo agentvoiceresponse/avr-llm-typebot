@@ -1,6 +1,6 @@
 {
   "name": "avr-llm-typebot",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Giuseppe Careri <info@gcareri.com> (https://gcareri.com)",
   "contributors": [],
   "keywords": ["avr", "llm", "typebot", "agentvoiceresponse", "voicebot"],
