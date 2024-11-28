@@ -1,9 +1,15 @@
 {
   "name": "avr-llm-typebot",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": "Giuseppe Careri <info@gcareri.com> (https://gcareri.com)",
   "contributors": [],
-  "keywords": ["avr", "llm", "typebot", "agentvoiceresponse", "voicebot"],
+  "keywords": [
+    "avr",
+    "llm",
+    "typebot",
+    "agentvoiceresponse",
+    "voicebot"
+  ],
   "description": "This repository contains the integration between Agent Voice Response and Typebot.io",
   "main": "index.js",
   "scripts": {
@@ -19,7 +25,8 @@
   "dependencies": {
     "axios": "^1.7.7",
     "dotenv": "^16.4.5",
-    "express": "^4.21.0"
+    "express": "^4.21.0",
+    "fluent-ffmpeg": "^2.1.3"
   },
   "devDependencies": {
     "nodemon": "^3.1.7"

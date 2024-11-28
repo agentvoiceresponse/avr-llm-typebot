@@ -6,6 +6,8 @@
  */
 const express = require('express');
 const axios = require('axios');
+const ffmpeg = require('fluent-ffmpeg');
+const { PassThrough } = require('stream');
 
 require('dotenv').config();
 
@@ -14,6 +16,53 @@ const app = express();
 app.use(express.json());
 
 let calls = {};
+
+/*
+* Processes an array of messages and sends the appropriate response to the client.
+*
+* @param {Array} messages - An array of message objects to process.
+* @param {Object} res - The Express response object used to send data back to the client.
+* @returns {Promise<void>} - A promise that resolves when all messages have been processed.
+*/
+const processMessages = async (messages, res) => {
+    for (const message of messages) {
+        switch (message.type) {
+            case 'text':
+                console.log('text', message.content.markdown);
+                res.write(JSON.stringify({ type: 'text', content: message.content.markdown }));
+                break;
+            case 'audio':
+                console.log('audio', message.content.url);
+                try {
+                    await new Promise(async (resolve, reject) => {
+                        const audioResponse = await axios.get(message.content.url, { responseType: 'stream' });
+                        const passThrough = new PassThrough();
+
+                        ffmpeg(audioResponse.data)
+                            .audioChannels(1)        // Convert to mono
+                            .audioFrequency(8000)     // Set sample rate to 8kHz
+                            .audioCodec('pcm_s16le')  // Set codec to 16-bit linear PCM
+                            .format('wav')            // Output format as WAV
+                            .on('error', reject)
+                            .pipe(passThrough);
+
+                        passThrough.on('data', (chunk) => {
+                            res.write(JSON.stringify({ type: 'audio', content: chunk }));
+                        });
+                        passThrough.on('end', resolve);
+                        passThrough.on('error', reject);
+                    });
+                } catch (error) {
+                    console.error('Error fetching audio:', error.message);
+                    res.status(500).json({ message: 'Error fetching audio with Typebot' });
+                }
+                break;
+            default:
+                console.log('Unknown message type:', message.type);
+                break;
+        }
+    }
+};
 
 /**
  * Handles a prompt stream from the client and uses the OpenAI API to generate
@@ -51,12 +100,7 @@ const handlePromptStream = async (req, res) => {
             });
             calls[uuid] = start.data.sessionId;
             // Send the initial messages to the client
-            for (const message of start.data.messages) {
-                if (message.type === 'text') {
-                    console.log(message.content.markdown)
-                    res.write(message.content.markdown);
-                }
-            }
+            await processMessages(start.data.messages, res);
         } else {
             // Continue the chat session
             const chat = await axios.post(`https://typebot.io/api/v1/sessions/${calls[uuid]}/continueChat`, {
@@ -67,14 +111,9 @@ const handlePromptStream = async (req, res) => {
                 textBubbleContentFormat: 'markdown'
             });
             // Send the new messages to the client
-            for (const message of chat.data.messages) {
-                if (message.type === 'text') {
-                    console.log(message.content.markdown)
-                    res.write(message.content.markdown);
-                }
-            }
+            await processMessages(chat.data.messages, res);
         }
-
+        console.log('END');
         res.end();
     } catch (error) {
         console.error('Error calling Typebot API:', error.message);

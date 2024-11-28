@@ -1,15 +1,18 @@
 # Agent Voice Response - Typebot.io Integration
 
-This repository contains the integration between **Agent Voice Response** ([agentvoiceresponse.com](https://www.agentvoiceresponse.com)) and **Typebot.io** ([typebot.io](https://typebot.io/)). 
+This repository contains the integration between **Agent Voice Response** ([agentvoiceresponse.com](https://www.agentvoiceresponse.com)) and **Typebot.io** ([typebot.io](https://typebot.io/)) highlighting the supported blocks and configurations for optimal performance.
 
 Typebot is an Fair Source chatbot builder. It allows you to create advanced chatbots visually, embed them anywhere on your web/mobile apps, and collect results in real-time
 
 This setup enables streaming real-time conversations between users and a Typebot instance, where user inputs are processed and responded to using Typebot’s chatbot system. The responses are then streamed back to the Agent Voice Response Core via Server-Sent Events (SSE).
 
 ## Table of Contents
+
 - [Overview](#overview)
 - [Installation](#installation)
 - [Configuration](#configuration)
+- [Supported Blocks](#supported-blocks)
+- [Integration Workflow](#integration-workflow)
 - [Usage](#usage)
 - [API Endpoints](#api-endpoints)
 
@@ -17,7 +20,8 @@ This setup enables streaming real-time conversations between users and a Typebot
 
 The integration sets up an Express.js server that acts as a middle layer between Agent Voice Response and Typebot.io. It allows users to start or continue a chat session with Typebot, and real-time responses are streamed back using Server-Sent Events (SSE).
 
-### Key Features:
+### Key Features
+
 - Start a new chat session with Typebot.
 - Continue a chat session by sending user messages.
 - Stream Typebot’s responses in real-time using SSE.
@@ -25,12 +29,14 @@ The integration sets up an Express.js server that acts as a middle layer between
 ## Installation
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/agentvoiceresponse/avr-llm-typebot.git
    cd avr-llm-typebot
    ```
 
 2. Install the dependencies:
+
    ```bash
    npm install
    ```
@@ -41,6 +47,61 @@ The integration sets up an Express.js server that acts as a middle layer between
 ## Configuration
 
 To set up this integration, you need an active Typebot project and API access.
+
+## Supported Blocks
+
+The following blocks are supported and recommended for creating a seamless user experience:
+
+1. Bubbles
+
+- **Text**: Display text bubbles to communicate information to the user.
+- **Audio**: Play pre-recorded audio messages to provide a richer user interaction.
+
+   > **Audio File Recommendation**:  
+   If you are using the **Audio Bubble** block, it is important to ensure the audio files are in the correct format.  
+
+   **Steps to Convert Audio to G.711:**
+
+   1. Visit [https://g711.org/](https://g711.org/).
+   2. Upload your audio file and keep the default configuration:  
+      - **Standard Definition 16-bit WAV**  
+      - **8kHz, Mono, 16-Bit PCM**  
+      - **Volume Normal**  
+      - Flag the checkbox: **Optimize Audio for Phone (Bandpass Filter)**.
+   3. After conversion, you will be redirected to the download page. Download the converted file and upload it to Typebot.io.
+
+### 2. **Inputs**
+
+- **Text**: Collect freeform text input from the user.
+- **Number**: Accept numerical input.
+- **Email**: Validate and collect email addresses.
+- **Website**: Collect URLs and validate their format.
+- **Date**: Request and validate dates.
+- **Phone**: Accept phone numbers in a structured format.
+
+### 3. **Logic**
+
+- **Set Variable**: Store dynamic data to variables for use in subsequent flows.
+- **Condition**: Add decision-making logic to guide the conversation flow.
+
+### 4. **Integrations**
+
+- **HTTP request**
+
+## Integration Workflow
+
+1. **Plan the Flow**: Define the user journey and the logic required in Typebot.io.
+2. **Prepare Resources**:
+   - Text bubbles for simple information.
+   - Audio bubbles for rich, interactive messages (convert audio files to G.711 as described).
+3. **Configure Blocks**:
+   - Use **Input** blocks to collect data from users.
+   - Apply **Logic** blocks to handle dynamic scenarios or trigger external workflows.
+4. **Test and Validate**:
+   - Test the flow in Typebot.io to ensure smooth transitions between blocks.
+   - Confirm that audio files play correctly and are optimized for telephony.
+
+By following this guide, you can create engaging and efficient conversational flows that integrate **Agent Voice Response** with **Typebot.io**, enhancing user interaction and experience.
 
 ### Environment Variables
 
@@ -74,6 +135,7 @@ This endpoint receives user messages and interacts with Typebot to retrieve resp
 - **Description**: Handles user messages, starts or continues a Typebot chat session, and returns the responses via SSE.
 
 **Example Request**:
+
 ```bash
 curl -X POST http://localhost:6005/prompt-stream \
      -H "Content-Type: application/json" \
@@ -84,6 +146,7 @@ curl -X POST http://localhost:6005/prompt-stream \
 ```
 
 **Request Body**:
+
 - `uuid`: A unique identifier for the user session.
 - `message`: The message sent by the user to Typebot.
 
@@ -98,4 +161,4 @@ The response will be streamed back to the client as a series of Server-Sent Even
 
 By integrating **Agent Voice Response** with **Typebot.io**, you can create seamless, real-time AI-driven conversations where user inputs are processed and responded to dynamically using the powerful Typebot chatbot system.
 
-For those who wish to contribute to the project, please send an email to info@agentvoiceresponse.com.
+For those who wish to contribute to the project, please send an email to <info@agentvoiceresponse.com>.
